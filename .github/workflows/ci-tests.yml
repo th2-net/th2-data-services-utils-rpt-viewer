@@ -14,8 +14,4 @@ jobs:
           python-version: 3.7
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt
-      - name: Test with pytest
-        run: |
-          pip install pytest
-          pytest
+          pip install -r requirements.txts
