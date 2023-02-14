@@ -24,4 +24,14 @@ repos:
         types: [ python ]
         args: [ --in-place, --remove-all-unused-imports ]
 
+  - repo: local
+    hooks:
+      - id: check_copyright
+        name: check_copyright
+        stages: [ commit ]
+        entry: python check_copyright.py copyright.txt ./th2
+        language: python
+        pass_filenames: false
+        always_run: true
+
 default_stages: [ commit, push ]
