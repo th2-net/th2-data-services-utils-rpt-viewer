@@ -11,7 +11,50 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-class Th2GUIReport:
+
+def _get_rows_for_tree_table(d: dict, _list=False):
+    """Protected recursive function for dict_to_tree_table function."""
+
+    rd = {}
+    if isinstance(d, dict):
+        for k, v in d.items():
+            rd[k] = _get_rows_for_tree_table(v)
+
+        if _list:
+            return rd
+        else:
+            return dict(
+                type='collection',
+                rows=rd
+            )
+
+    elif isinstance(d, list):
+        rows = {}
+        for idx, v in enumerate(d):
+            rows[idx] = dict(
+                type='collection',
+                rows=_get_rows_for_tree_table(v, _list=True)
+            )
+        return dict(
+            type='collection',
+            rows=rows
+        )
+
+    elif isinstance(d, (str, int, float, tuple)) or d is None:
+        if isinstance(d, tuple):
+            columns = {F'col{idx}': v for idx, v in enumerate(d)}
+        else:
+            columns = {'col1': d}
+        return dict(
+            type='row',
+            columns=columns
+        )
+
+    else:
+        return _get_rows_for_tree_table(vars(d))
+
+
+class ViewerUtil:
     """Class for creating gui link by event ID or message ID."""
 
     def __init__(self, provider_link: str):
@@ -65,7 +108,8 @@ class Th2GUIReport:
         """
         return f"{self._provider_link}?messageId={message_id}"
 
-    def dict_to_tree_table(self, d: dict, table_name=None):
+    @classmethod
+    def dict_to_tree_table(cls, d: dict, table_name=None):
         """
         Convert dict to tree-table.
 
@@ -82,45 +126,3 @@ class Th2GUIReport:
             name=table_name,
             rows=rd
         )
-
-
-    def _get_rows_for_tree_table(self, d: dict, _list=False):
-        """Protected recursive function for dict_to_tree_table function."""
-
-        rd = {}
-        if isinstance(d, dict):
-            for k, v in d.items():
-                rd[k] = _get_rows_for_tree_table(v)
-
-            if _list:
-                return rd
-            else:
-                return dict(
-                    type='collection',
-                    rows=rd
-                )
-
-        elif isinstance(d, list):
-            rows = {}
-            for idx, v in enumerate(d):
-                rows[idx] = dict(
-                    type='collection',
-                    rows=_get_rows_for_tree_table(v, _list=True)
-                )
-            return dict(
-                type='collection',
-                rows=rows
-            )
-
-        elif isinstance(d, (str, int, float, tuple)) or d is None:
-            if isinstance(d, tuple):
-                columns = {F'col{idx}': v for idx, v in enumerate(d)}
-            else:
-                columns = {'col1': d}
-            return dict(
-                type='row',
-                columns=columns
-            )
-
-        else:
-            return _get_rows_for_tree_table(vars(d))
